@@ -3,10 +3,12 @@ import plotly.graph_objects as go
 
 
 class Field:
-    def __init__(self, field_width=53.3, field_length=120):
+    def __init__(self, field_width=53.3, field_length=120, step_duration=200):
         self.field_width = field_width
         self.field_length = field_length
         self.field_subdivision = field_length / 12
+
+        self.step_duration = step_duration
 
         self.color_field = "#96B78C"
         self.color_endzone = "#6F976D"
@@ -49,12 +51,12 @@ class Field:
                             "args": [
                                 None,
                                 {
-                                    "frame": {"duration": 200, "redraw": False},
+                                    "frame": {"duration": self.step_duration, "redraw": False},
                                     "fromcurrent": True,
                                     "transition": {"duration": 0},
                                 },
                             ],
-                            "label": "Play",
+                            "label": "⏵",
                             "method": "animate",
                         },
                         {
@@ -66,7 +68,7 @@ class Field:
                                     "transition": {"duration": 0},
                                 },
                             ],
-                            "label": "Pause",
+                            "label": "⏸",
                             "method": "animate",
                         },
                     ],
@@ -86,7 +88,7 @@ class Field:
                     "yanchor": "top",
                     "xanchor": "left",
                     "currentvalue": {"font": {"size": 20}, "prefix": "frameId: ", "visible": True, "xanchor": "right"},
-                    "transition": {"duration": 200, "easing": "cubic-in-out"},
+                    "transition": {"duration": self.step_duration, "easing": "cubic-in-out"},
                     "pad": {"b": 10, "t": 50},
                     "len": 0.9,
                     "x": 0.1,
@@ -134,6 +136,21 @@ class Field:
         )
         return fig
 
+    def _create_step(self, frame_id):
+        step = {
+            "args": [
+                [frame_id],
+                {
+                    "frame": {"duration": self.step_duration, "redraw": False},
+                    "mode": "immediate",
+                    "transition": {"duration": 0},
+                },
+            ],
+            "label": frame_id,
+            "method": "animate",
+        }
+        return step
+
     def draw_scrimmage_and_first_down(self, absoluteYardlineNumber, yardsToGo, playDirection):
         if playDirection == "right":
             yard_line_first_down = absoluteYardlineNumber + yardsToGo
@@ -144,3 +161,23 @@ class Field:
 
         self.fig = self._draw_line_on_field(self.fig, absoluteYardlineNumber, "#0070C0", 2)
         self.fig = self._draw_line_on_field(self.fig, yard_line_first_down, "#E9D11F", 2)
+
+    def create_animation(self):
+        frames = []
+        steps = []
+        for i in range(10):
+            steps.append(self._create_step(i))
+            frames.append(
+                {
+                    "data": go.Scatter(
+                        x=[np.random.random() * 100],
+                        y=[np.random.random() * 50],
+                        mode="markers",
+                        marker={"size": 10, "color": "red"},
+                    ),
+                    "name": i,
+                }
+            )
+        self.fig.add_trace(frames[0]["data"])
+        self.fig.frames = frames
+        self.fig.layout.sliders[0]["steps"] = steps

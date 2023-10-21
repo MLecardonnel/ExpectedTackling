@@ -40,7 +40,8 @@ class Field:
 
         fig.update_layout(
             xaxis={"range": [-5, field_length + 5], "visible": False},
-            yaxis={"range": [-5, field_width + 5], "visible": False},
+            yaxis={"range": [-5, field_width + 5], "visible": False, "scaleanchor": "x", "scaleratio": 1},
+            height=600,
             updatemenus=[
                 {
                     "buttons": [

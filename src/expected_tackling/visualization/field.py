@@ -3,7 +3,7 @@ import plotly.graph_objects as go
 
 
 class Field:
-    def __init__(self, field_width=53.3, field_length=120, step_duration=200):
+    def __init__(self, field_width=53.3, field_length=120, step_duration=50):
         self.field_width = field_width
         self.field_length = field_length
         self.field_subdivision = field_length / 12
@@ -162,22 +162,71 @@ class Field:
         self.fig = self._draw_line_on_field(self.fig, absoluteYardlineNumber, "#0070C0", 2)
         self.fig = self._draw_line_on_field(self.fig, yard_line_first_down, "#E9D11F", 2)
 
-    def create_animation(self):
+    def create_animation(self, play_tracking):
         frames = []
         steps = []
-        for i in range(10):
-            steps.append(self._create_step(i))
+        for frame_id in play_tracking["frameId"].unique():
+            frame_tracking = play_tracking[play_tracking["frameId"] == frame_id]
+            players_tracking = frame_tracking[~frame_tracking["nflId"].isna()]
+
+            ball_carrying_tracking = players_tracking[players_tracking["is_ball_carrying"]]
+            defense_tracking = players_tracking[
+                (~players_tracking["is_ball_carrying"]) & (players_tracking["is_defense"])
+            ]
+            offense_tracking = players_tracking[
+                (~players_tracking["is_ball_carrying"]) & (~players_tracking["is_defense"])
+            ]
+
+            data = []
+            data.append(
+                go.Scatter(
+                    x=defense_tracking["x"],
+                    y=defense_tracking["y"],
+                    mode="markers",
+                    marker={"size": 10, "color": "white"},
+                    name="defense",
+                ),
+            )
+
+            data.append(
+                go.Scatter(
+                    x=offense_tracking["x"],
+                    y=offense_tracking["y"],
+                    mode="markers",
+                    marker={"size": 10, "color": "black"},
+                    name="offense",
+                ),
+            )
+
+            if len(ball_carrying_tracking) != 0:
+                data.append(
+                    go.Scatter(
+                        x=ball_carrying_tracking["x"],
+                        y=ball_carrying_tracking["y"],
+                        mode="markers",
+                        marker={"size": 10, "color": "yellow", "opacity": 1},
+                        name="ball_carrier",
+                    ),
+                )
+            else:
+                data.append(
+                    go.Scatter(
+                        x=[0],
+                        y=[0],
+                        mode="markers",
+                        marker={"size": 10, "color": "yellow", "opacity": 0},
+                        name="ball_carrier",
+                    ),
+                )
+
+            steps.append(self._create_step(str(frame_id)))
             frames.append(
                 {
-                    "data": go.Scatter(
-                        x=[np.random.random() * 100],
-                        y=[np.random.random() * 50],
-                        mode="markers",
-                        marker={"size": 10, "color": "red"},
-                    ),
-                    "name": i,
+                    "data": data,
+                    "name": str(frame_id),
                 }
             )
-        self.fig.add_trace(frames[0]["data"])
+        for trace in frames[0]["data"]:
+            self.fig.add_trace(trace)
         self.fig.frames = frames
         self.fig.layout.sliders[0]["steps"] = steps

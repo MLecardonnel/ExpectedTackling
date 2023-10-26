@@ -1,5 +1,7 @@
 import numpy as np
 import plotly.graph_objects as go
+from matplotlib.cm import Reds
+from matplotlib.colors import to_hex
 
 
 class Field:
@@ -185,6 +187,7 @@ class Field:
                     mode="markers",
                     marker={"size": 10, "color": "white"},
                     name="defense",
+                    hoverinfo="none",
                 ),
             )
 
@@ -195,6 +198,7 @@ class Field:
                     mode="markers",
                     marker={"size": 10, "color": "black"},
                     name="offense",
+                    hoverinfo="none",
                 ),
             )
 
@@ -206,6 +210,7 @@ class Field:
                         mode="markers",
                         marker={"size": 10, "color": "yellow", "opacity": 1},
                         name="ball_carrier",
+                        hoverinfo="none",
                     ),
                 )
             else:
@@ -216,6 +221,91 @@ class Field:
                         mode="markers",
                         marker={"size": 10, "color": "yellow", "opacity": 0},
                         name="ball_carrier",
+                        hoverinfo="none",
+                    ),
+                )
+
+            steps.append(self._create_step(str(frame_id)))
+            frames.append(
+                {
+                    "data": data,
+                    "name": str(frame_id),
+                }
+            )
+        for trace in frames[0]["data"]:
+            self.fig.add_trace(trace)
+        self.fig.frames = frames
+        self.fig.layout.sliders[0]["steps"] = steps
+
+    def _get_color(self, value):
+        return to_hex(Reds(value))
+
+    def create_tackling_probability_animation(self, play_tracking):
+        fake_color = np.arange(0, 1, 1 / play_tracking["frameId"].max())
+        frames = []
+        steps = []
+        for frame_id in play_tracking["frameId"].unique():
+            frame_tracking = play_tracking[play_tracking["frameId"] == frame_id]
+            players_tracking = frame_tracking[~frame_tracking["nflId"].isna()]
+
+            ball_carrying_tracking = players_tracking[players_tracking["is_ball_carrying"]]
+            defense_tracking = players_tracking[
+                (~players_tracking["is_ball_carrying"]) & (players_tracking["is_defense"])
+            ]
+            offense_tracking = players_tracking[
+                (~players_tracking["is_ball_carrying"]) & (~players_tracking["is_defense"])
+            ]
+
+            data = []
+            data.append(
+                go.Scatter(
+                    x=defense_tracking["x"],
+                    y=defense_tracking["y"],
+                    mode="markers",
+                    marker={
+                        "size": 10,
+                        "color": self._get_color(fake_color[frame_id]),
+                        "cmin": 0,
+                        "cmax": 1,
+                        "colorscale": "Reds",
+                        "colorbar": dict(title="defense", thickness=10, x=1.03, y=0.4, len=0.85),
+                    },
+                    name="defense",
+                    showlegend=False,
+                ),
+            )
+
+            data.append(
+                go.Scatter(
+                    x=offense_tracking["x"],
+                    y=offense_tracking["y"],
+                    mode="markers",
+                    marker={"size": 10, "color": "black"},
+                    name="offense",
+                    hoverinfo="none",
+                ),
+            )
+
+            if len(ball_carrying_tracking) != 0:
+                data.append(
+                    go.Scatter(
+                        x=ball_carrying_tracking["x"],
+                        y=ball_carrying_tracking["y"],
+                        mode="markers",
+                        marker={"size": 10, "color": "yellow", "opacity": 1},
+                        name="ball_carrier",
+                        hoverinfo="none",
+                    ),
+                )
+            else:
+                data.append(
+                    go.Scatter(
+                        x=[0],
+                        y=[0],
+                        mode="markers",
+                        marker={"size": 10, "color": "yellow", "opacity": 0},
+                        name="ball_carrier",
+                        hoverinfo="none",
                     ),
                 )
 

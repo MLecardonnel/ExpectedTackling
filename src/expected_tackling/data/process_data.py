@@ -99,6 +99,7 @@ def compute_visualization_data(plays_frames_valid, plays_events, plays, players,
     )
     qb_players = (
         players_positions[players_positions["position"] == "QB"]
+        .drop_duplicates(subset=["gameId", "playId"])
         .drop(columns="position")
         .rename(columns={"nflId": "qbId"})
     )

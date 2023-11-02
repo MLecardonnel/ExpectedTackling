@@ -53,6 +53,14 @@ def _compute_sample_features(sample, ball_carrier):
     return sample
 
 
+def _inverse_left_directed_plays(features_data):
+    left_playDirection = features_data["playDirection"] == "left"
+    for col in ["o", "dir", "o_ball_carrier", "dir_ball_carrier", "direction_to_ball_carrier"]:
+        features_data.loc[left_playDirection, col] = (180 - (features_data.loc[left_playDirection, col] - 180)) % 360
+
+    return features_data
+
+
 def compute_features_data(targeted_data, tracking):
     merged_data = targeted_data.merge(
         tracking[["gameId", "playId", "nflId", "frameId"] + [col for col in tracking if col not in targeted_data]],
@@ -77,23 +85,20 @@ def compute_features_data(targeted_data, tracking):
 
     features_data = defense.apply(lambda x: _compute_sample_features(x, ball_carrier), axis=1)
 
-    ball_carrier_distance_to_sideline = (
-        ball_carrier["y"].apply(_compute_distance_to_nearest_sideline).rename("ball_carrier_distance_to_sideline")
-    )
-    ball_carrier_distance_to_endzone = ball_carrier.apply(
+    ball_carrier["ball_carrier_distance_to_sideline"] = ball_carrier["y"].apply(_compute_distance_to_nearest_sideline)
+    ball_carrier["ball_carrier_distance_to_endzone"] = ball_carrier.apply(
         lambda x: _compute_distance_to_endzone(x["x"], x["playDirection"]), axis=1
-    ).rename("ball_carrier_distance_to_endzone")
-
-    features_data = features_data.merge(
-        ball_carrier_distance_to_sideline,
-        left_on=["gameId", "playId", "frameId"],
-        right_index=True,
     )
 
     features_data = features_data.merge(
-        ball_carrier_distance_to_endzone,
+        ball_carrier[
+            ["s", "a", "dis", "o", "dir", "ball_carrier_distance_to_sideline", "ball_carrier_distance_to_endzone"]
+        ],
         left_on=["gameId", "playId", "frameId"],
         right_index=True,
+        suffixes=("", "_ball_carrier"),
     )
+
+    features_data = _inverse_left_directed_plays(features_data)
 
     return features_data

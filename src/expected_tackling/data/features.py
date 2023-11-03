@@ -56,7 +56,7 @@ def _compute_sample_features(sample, ball_carrier):
 def _inverse_left_directed_plays(features_data):
     left_playDirection = features_data["playDirection"] == "left"
     for col in ["o", "dir", "o_ball_carrier", "dir_ball_carrier", "direction_to_ball_carrier"]:
-        features_data.loc[left_playDirection, col] = (180 - (features_data.loc[left_playDirection, col] - 180)) % 360
+        features_data.loc[left_playDirection, col] = (360 - features_data.loc[left_playDirection, col]) % 360
 
     return features_data
 

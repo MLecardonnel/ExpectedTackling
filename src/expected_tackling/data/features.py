@@ -166,6 +166,9 @@ def compute_features_data_with_threads(targeted_data, tracking, nb_threads=10):
     tracking_games = tracking["gameId"].unique()
     total_items = len(tracking_games)
     chunk_size = total_items // nb_threads
+    while total_items % nb_threads > chunk_size:
+        nb_threads = total_items % nb_threads
+        chunk_size = total_items // nb_threads
 
     manager = Manager()
     shared_dataframe_list = manager.list()

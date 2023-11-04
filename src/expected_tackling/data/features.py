@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+import threading
+from multiprocessing import Manager
 
 
 def create_target(visualization_tracking_data, tackles):
@@ -65,6 +67,7 @@ def _compute_blockers_features(sample, frame_blockers, nb_blockers=3):
 
 
 def _compute_sample_features(sample, frame_ball_carrier, frame_blockers):
+    sample = sample.copy()
     sample["distance_to_ball_carrier"] = _compute_distance_between_players(
         sample["x"], sample["y"], frame_ball_carrier["x"], frame_ball_carrier["y"]
     )
@@ -157,3 +160,34 @@ def compute_features_data(targeted_data, tracking):
     features_data = _inverse_left_directed_plays(features_data)
 
     return features_data
+
+
+def compute_features_data_with_threads(targeted_data, tracking, nb_threads=10):
+    tracking_games = tracking["gameId"].unique()
+    total_items = len(tracking_games)
+    chunk_size = total_items // nb_threads
+
+    manager = Manager()
+    shared_dataframe_list = manager.list()
+
+    def thread_function(i):
+        start = i * chunk_size
+        end = (i + 1) * chunk_size if i < nb_threads - 1 else total_items
+        features_data = compute_features_data(
+            targeted_data, tracking[tracking["gameId"].isin(tracking_games[start:end])]
+        )
+
+        shared_dataframe_list.append(features_data)
+
+    threads = []
+    for i in range(nb_threads):
+        thread = threading.Thread(target=thread_function, args=(i,))
+        threads.append(thread)
+        thread.start()
+
+    for thread in threads:
+        thread.join()
+
+    result_df = pd.concat(shared_dataframe_list, ignore_index=True)
+
+    return result_df

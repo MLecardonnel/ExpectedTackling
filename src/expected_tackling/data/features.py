@@ -42,6 +42,7 @@ def _compute_distance_to_endzone(x, playDirection, field_length=120):
 
 
 def _compute_blockers_features(sample, frame_blockers, nb_blockers=3):
+    frame_blockers = frame_blockers.copy()
     columns_to_suffix = ["s", "a", "dis", "o", "dir"]
     columns_suffix_dict = {col: col + "_blocker" for col in columns_to_suffix}
 
@@ -63,10 +64,7 @@ def _compute_blockers_features(sample, frame_blockers, nb_blockers=3):
     return blockers_features
 
 
-def _compute_sample_features(sample, ball_carrier, blockers):
-    frame_ball_carrier = ball_carrier.loc[(sample["gameId"], sample["playId"], sample["frameId"])]
-    frame_blockers = blockers.loc[(sample["gameId"], sample["playId"], sample["frameId"])]
-
+def _compute_sample_features(sample, frame_ball_carrier, frame_blockers):
     sample["distance_to_ball_carrier"] = _compute_distance_between_players(
         sample["x"], sample["y"], frame_ball_carrier["x"], frame_ball_carrier["y"]
     )
@@ -79,6 +77,17 @@ def _compute_sample_features(sample, ball_carrier, blockers):
     sample_features = pd.concat([sample, blockers_features])
 
     return sample_features
+
+
+def _compute_group_features(group, frame_ball_carrier, frame_blockers):
+    return group.apply(
+        lambda x: _compute_sample_features(
+            x,
+            frame_ball_carrier,
+            frame_blockers,
+        ),
+        axis=1,
+    )
 
 
 def _inverse_left_directed_plays(features_data):
@@ -116,7 +125,17 @@ def compute_features_data(targeted_data, tracking):
         ["gameId", "playId", "frameId", "nflId"]
     )
 
-    features_data = defense.apply(lambda x: _compute_sample_features(x, ball_carrier, blockers), axis=1)
+    features_data = (
+        defense.groupby(["gameId", "playId", "frameId"])
+        .apply(
+            lambda x: _compute_group_features(
+                x,
+                ball_carrier.loc[(x["gameId"].iloc[0], x["playId"].iloc[0], x["frameId"].iloc[0])],
+                blockers.loc[(x["gameId"].iloc[0], x["playId"].iloc[0], x["frameId"].iloc[0])],
+            )
+        )
+        .reset_index(drop=True)
+    )
     features_data = features_data[
         defense.columns.to_list() + [col for col in features_data.columns if col not in defense.columns]
     ]

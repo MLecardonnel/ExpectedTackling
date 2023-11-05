@@ -167,7 +167,7 @@ def compute_features_data_with_threads(targeted_data, tracking, nb_threads=10):
     total_items = len(tracking_games)
     chunk_size = total_items // nb_threads
     while total_items % nb_threads > chunk_size:
-        nb_threads = total_items % nb_threads
+        nb_threads = nb_threads - 1
         chunk_size = total_items // nb_threads
 
     manager = Manager()

@@ -180,16 +180,6 @@ class Field:
             ]
 
             data = []
-            data.append(
-                go.Scatter(
-                    x=defense_tracking["x"],
-                    y=defense_tracking["y"],
-                    mode="markers",
-                    marker={"size": 10, "color": "white"},
-                    name="defense",
-                    hoverinfo="none",
-                ),
-            )
 
             data.append(
                 go.Scatter(
@@ -224,6 +214,17 @@ class Field:
                         hoverinfo="none",
                     ),
                 )
+
+            data.append(
+                go.Scatter(
+                    x=defense_tracking["x"],
+                    y=defense_tracking["y"],
+                    mode="markers",
+                    marker={"size": 10, "color": "white"},
+                    name="defense",
+                    hoverinfo="none",
+                ),
+            )
 
             steps.append(self._create_step(str(frame_id)))
             frames.append(
@@ -241,7 +242,6 @@ class Field:
         return to_hex(Reds(value))
 
     def create_tackling_probability_animation(self, play_tracking):
-        fake_color = np.arange(0, 1, 1 / play_tracking["frameId"].max())
         frames = []
         steps = []
         for frame_id in play_tracking["frameId"].unique():
@@ -257,23 +257,6 @@ class Field:
             ]
 
             data = []
-            data.append(
-                go.Scatter(
-                    x=defense_tracking["x"],
-                    y=defense_tracking["y"],
-                    mode="markers",
-                    marker={
-                        "size": 10,
-                        "color": self._get_color(fake_color[frame_id]),
-                        "cmin": 0,
-                        "cmax": 1,
-                        "colorscale": "Reds",
-                        "colorbar": dict(title="defense", thickness=10, x=1.03, y=0.4, len=0.85),
-                    },
-                    name="defense",
-                    showlegend=False,
-                ),
-            )
 
             data.append(
                 go.Scatter(
@@ -308,6 +291,39 @@ class Field:
                         hoverinfo="none",
                     ),
                 )
+
+            data.append(
+                go.Scatter(
+                    x=defense_tracking["x"],
+                    y=defense_tracking["y"],
+                    mode="markers",
+                    marker={
+                        "size": 10,
+                        "color": defense_tracking["tackling_probability"].apply(self._get_color),
+                        "cmin": 0,
+                        "cmax": 1,
+                        "colorscale": "Reds",
+                        "colorbar": dict(title="defense", thickness=10, x=1.03, y=0.4, len=0.85),
+                    },
+                    customdata=np.stack(
+                        (
+                            defense_tracking["nflId"].astype(int),
+                            defense_tracking["displayName"],
+                            defense_tracking["position"],
+                            defense_tracking["club"],
+                            defense_tracking["tackling_probability"].round(2),
+                        ),
+                        axis=-1,
+                    ),
+                    hovertemplate="<b>nflId:</b> %{customdata[0]}<br>"
+                    "<b>Player:</b> %{customdata[1]} %{customdata[2]}<br>"
+                    "<b>Team:</b> %{customdata[3]}<br>"
+                    "<br>"
+                    "<b>Tackling Probability:</b> %{customdata[4]}",
+                    name="defense",
+                    showlegend=False,
+                ),
+            )
 
             steps.append(self._create_step(str(frame_id)))
             frames.append(

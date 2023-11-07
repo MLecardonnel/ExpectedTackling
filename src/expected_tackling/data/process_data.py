@@ -117,4 +117,8 @@ def compute_visualization_data(plays_frames_valid, plays_events, plays, players,
         visualization_tracking_data["nflId"] == visualization_tracking_data["ball_carrier_id"]
     )
 
+    visualization_tracking_data = visualization_tracking_data.merge(
+        players[["nflId", "position", "displayName"]], how="left", on="nflId"
+    )
+
     return visualization_tracking_data

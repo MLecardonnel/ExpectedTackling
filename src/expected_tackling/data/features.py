@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
-import threading
 from multiprocessing import Manager
+import concurrent.futures
 
 
 def create_target(visualization_tracking_data, tackles):
@@ -162,34 +162,38 @@ def compute_features_data(targeted_data, tracking):
     return features_data
 
 
-def compute_features_data_with_threads(targeted_data, tracking, nb_threads=10):
+def process_function(shared_dataframe_list, start, end, targeted_data, tracking, tracking_games):
+    features_data = compute_features_data(targeted_data, tracking[tracking["gameId"].isin(tracking_games[start:end])])
+
+    shared_dataframe_list.append(features_data)
+
+
+def compute_features_data_with_multiprocessing(targeted_data, tracking, nb_process=10):
     tracking_games = tracking["gameId"].unique()
     total_items = len(tracking_games)
-    chunk_size = total_items // nb_threads
-    while total_items % nb_threads > chunk_size:
-        nb_threads = nb_threads - 1
-        chunk_size = total_items // nb_threads
+    chunk_size = total_items // nb_process
+    while total_items % nb_process > chunk_size:
+        nb_process = nb_process - 1
+        chunk_size = total_items // nb_process
 
     manager = Manager()
     shared_dataframe_list = manager.list()
 
-    def thread_function(i):
-        start = i * chunk_size
-        end = (i + 1) * chunk_size if i < nb_threads - 1 else total_items
-        features_data = compute_features_data(
-            targeted_data, tracking[tracking["gameId"].isin(tracking_games[start:end])]
-        )
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+        futures = [
+            executor.submit(
+                process_function,
+                shared_dataframe_list,
+                i * chunk_size,
+                (i + 1) * chunk_size if i < nb_process - 1 else total_items,
+                targeted_data,
+                tracking,
+                tracking_games,
+            )
+            for i in range(nb_process)
+        ]
 
-        shared_dataframe_list.append(features_data)
-
-    threads = []
-    for i in range(nb_threads):
-        thread = threading.Thread(target=thread_function, args=(i,))
-        threads.append(thread)
-        thread.start()
-
-    for thread in threads:
-        thread.join()
+        concurrent.futures.wait(futures)
 
     result_df = pd.concat(shared_dataframe_list, ignore_index=True)
 

@@ -9,21 +9,17 @@ figures_path = str(Path(__file__).parents[3] / "reports/figures")
 
 
 class Explainer:
-    def __init__(self, features_data, model, sample_size=100000):
-        y = features_data["will_tackle"].astype(int)
-        X = features_data.drop(
-            columns=["gameId", "playId", "nflId", "frameId", "x", "y", "playDirection", "will_tackle"]
-        )
-
-        X_sample = X.sample(sample_size)
+    def __init__(self, X, y, model, sample_size=100000):
+        if X.shape[0] > sample_size:
+            X = X.sample(sample_size)
 
         xpl = SmartExplainer(
             model=model,
         )
 
         xpl.compile(
-            x=X_sample,
-            y_target=y.loc[X_sample.index],
+            x=X,
+            y_target=y.loc[X.index],
         )
 
         self.xpl = xpl

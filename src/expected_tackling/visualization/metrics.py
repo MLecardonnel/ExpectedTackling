@@ -1,4 +1,4 @@
-import os
+import io
 from pathlib import Path
 from PIL import Image
 import matplotlib.pyplot as plt
@@ -23,7 +23,6 @@ def plot_confusion_matrix(train_confusion_matrix, test_confusion_matrix, name="c
         width=500,
         height=200,
     )
-    train_table.write_image(figures_path + f"/train_table.png", format="png")
 
     test_table = create_table(
         pd.DataFrame(
@@ -38,10 +37,9 @@ def plot_confusion_matrix(train_confusion_matrix, test_confusion_matrix, name="c
         width=500,
         height=200,
     )
-    test_table.write_image(figures_path + f"/test_table.png", format="png")
 
-    train_image = Image.open(figures_path + f"/train_table.png")
-    test_image = Image.open(figures_path + f"/test_table.png")
+    train_image = Image.open(io.BytesIO(train_table.to_image(format="png")))
+    test_image = Image.open(io.BytesIO(test_table.to_image(format="png")))
 
     fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 4))
     axes[0].imshow(np.array(train_image))
@@ -50,8 +48,5 @@ def plot_confusion_matrix(train_confusion_matrix, test_confusion_matrix, name="c
     axes[1].imshow(np.array(test_image))
     axes[1].set_axis_off()
     axes[1].set_title("Test Confusion Matrix")
-
-    os.remove(figures_path + f"/train_table.png")
-    os.remove(figures_path + f"/test_table.png")
 
     plt.savefig(figures_path + f"/{name}.png", bbox_inches="tight")

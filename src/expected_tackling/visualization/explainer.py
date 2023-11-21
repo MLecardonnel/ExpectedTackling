@@ -1,4 +1,4 @@
-import os
+import io
 from pathlib import Path
 from PIL import Image
 import matplotlib.pyplot as plt
@@ -42,13 +42,12 @@ class Explainer:
         fig, axes = plt.subplots(nrows=nrows, ncols=2, figsize=(12, 4 * nrows))
         for i in range(nb_features):
             col = features_columns[i]
-            self.xpl.plot.contribution_plot(col=col).write_image(figures_path + f"/{col}.png", format="png")
-            image = Image.open(figures_path + f"/{col}.png")
+            contribution_plot = self.xpl.plot.contribution_plot(col=col)
+            image = Image.open(io.BytesIO(contribution_plot.to_image(format="png")))
             x = i // 2
             y = i % 2
             axes[x, y].imshow(np.array(image))
             axes[x, y].set_axis_off()
-            os.remove(figures_path + f"/{col}.png")
 
         plt.subplots_adjust(wspace=0)
         plt.savefig(figures_path + f"/{name}.png", bbox_inches="tight")

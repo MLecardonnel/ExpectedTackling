@@ -1,9 +1,7 @@
 def _compute_group_features(group):
     group = group.sort_values("frameId")
     argmax = group["ott"].argmax()
-    res = group[["ott", "ball_carrier_distance_to_endzone", "frameId"]].iloc[argmax]
-    res["nb_frames_from_end"] = group["frameId"].max() - res["frameId"]
-    res = res.drop(index="frameId")
+    res = group[["ott", "ball_carrier_distance_to_endzone"]].iloc[argmax]
     res["mean_distance_to_ball_carrier_from_peak"] = group.iloc[argmax:]["distance_to_ball_carrier"].mean()
     res["ball_carrier_distance_won_to_last_frame"] = max(
         res["ball_carrier_distance_to_endzone"] - group.iloc[-1]["ball_carrier_distance_to_endzone"], 0

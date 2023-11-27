@@ -1,4 +1,4 @@
-import os
+import io
 from pathlib import Path
 from PIL import Image
 import matplotlib.pyplot as plt
@@ -9,21 +9,17 @@ figures_path = str(Path(__file__).parents[3] / "reports/figures")
 
 
 class Explainer:
-    def __init__(self, features_data, model, sample_size=100000):
-        y = features_data["will_tackle"].astype(int)
-        X = features_data.drop(
-            columns=["gameId", "playId", "nflId", "frameId", "x", "y", "playDirection", "will_tackle"]
-        )
-
-        X_sample = X.sample(sample_size)
+    def __init__(self, X, y, model, sample_size=100000):
+        if X.shape[0] > sample_size:
+            X = X.sample(sample_size)
 
         xpl = SmartExplainer(
             model=model,
         )
 
         xpl.compile(
-            x=X_sample,
-            y_target=y.loc[X_sample.index],
+            x=X,
+            y_target=y.loc[X.index],
         )
 
         self.xpl = xpl
@@ -46,13 +42,12 @@ class Explainer:
         fig, axes = plt.subplots(nrows=nrows, ncols=2, figsize=(12, 4 * nrows))
         for i in range(nb_features):
             col = features_columns[i]
-            self.xpl.plot.contribution_plot(col=col).write_image(figures_path + f"/{col}.png", format="png")
-            image = Image.open(figures_path + f"/{col}.png")
+            contribution_plot = self.xpl.plot.contribution_plot(col=col)
+            image = Image.open(io.BytesIO(contribution_plot.to_image(format="png")))
             x = i // 2
             y = i % 2
             axes[x, y].imshow(np.array(image))
             axes[x, y].set_axis_off()
-            os.remove(figures_path + f"/{col}.png")
 
         plt.subplots_adjust(wspace=0)
         plt.savefig(figures_path + f"/{name}.png", bbox_inches="tight")

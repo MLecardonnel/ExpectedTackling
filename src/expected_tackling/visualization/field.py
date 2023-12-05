@@ -343,9 +343,9 @@ class Field:
         self.fig.layout.sliders[0]["steps"] = steps
 
     def save_as_gif(self, name="animated_play"):
+        layout = copy.deepcopy(self.fig.layout)
         with imageio.get_writer(animations_path + f"/{name}.gif", mode="I", loop=0) as writer:
             for i, frame in enumerate(self.fig.frames):
-                layout = copy.deepcopy(self.fig.layout)
                 layout.sliders[0]["active"] = i
                 fig = go.Figure(frame.data, layout=layout)
                 writer.append_data(imageio.imread(fig.to_image(format="png", height=600, width=1350)))

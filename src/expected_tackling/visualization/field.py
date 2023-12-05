@@ -1,7 +1,12 @@
+import copy
+from pathlib import Path
 import numpy as np
 import plotly.graph_objects as go
 from matplotlib.cm import Reds
 from matplotlib.colors import to_hex
+import imageio.v2 as imageio
+
+animations_path = str(Path(__file__).parents[3] / "reports/animations")
 
 
 class Field:
@@ -336,3 +341,11 @@ class Field:
             self.fig.add_trace(trace)
         self.fig.frames = frames
         self.fig.layout.sliders[0]["steps"] = steps
+
+    def save_as_gif(self, name="animated_play"):
+        with imageio.get_writer(animations_path + f"/{name}.gif", mode="I", loop=0) as writer:
+            for i, frame in enumerate(self.fig.frames):
+                layout = copy.deepcopy(self.fig.layout)
+                layout.sliders[0]["active"] = i
+                fig = go.Figure(frame.data, layout=layout)
+                writer.append_data(imageio.imread(fig.to_image(format="png", height=600, width=1350)))

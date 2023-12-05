@@ -62,3 +62,23 @@ def compute_mott_features_data(features_data, tackling_probability, tackles):
     ] = 0
 
     return mott_features_data
+
+
+def sample_training_data(mott_features_data, negatives_multplier=10):
+    mott_features_data_for_sampling = mott_features_data[
+        ~mott_features_data.index.droplevel(3).duplicated(keep=False)
+    ].copy()
+
+    sample_mott_features_data = pd.concat(
+        [
+            mott_features_data_for_sampling[
+                (mott_features_data_for_sampling["pff_missedTackle"] == 1)
+                & (mott_features_data_for_sampling["ott"] > 0.1)
+            ],
+            mott_features_data_for_sampling[mott_features_data_for_sampling["pff_missedTackle"] == 0].sample(
+                len(mott_features_data_for_sampling[mott_features_data_for_sampling["pff_missedTackle"] == 1])
+                * negatives_multplier
+            ),
+        ]
+    )
+    return sample_mott_features_data

@@ -342,6 +342,18 @@ class Field:
         self.fig.frames = frames
         self.fig.layout.sliders[0]["steps"] = steps
 
+    def add_mott_predictions(self, mott_predictions):
+        mott_predictions = mott_predictions[mott_predictions["mott"] == 1].sort_values("frameId")
+        motts = [
+            f"{record['position']} {record['displayName']} ({int(record['nflId'])}) on frame {int(record['frameId'])}"
+            for record in mott_predictions.to_dict("records")
+        ]
+        if len(motts) > 0:
+            text = "MOTT: "
+            for i in range(int(np.ceil(len(motts) / 3))):
+                text += ", ".join(motts[3 * i : 3 * (i + 1)]) + "<br>"
+            self.fig.layout.title = text
+
     def save_as_gif(self, name="animated_play"):
         layout = copy.deepcopy(self.fig.layout)
         with imageio.get_writer(animations_path + f"/{name}.gif", mode="I", loop=0) as writer:

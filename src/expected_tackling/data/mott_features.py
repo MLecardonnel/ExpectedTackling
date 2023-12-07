@@ -10,7 +10,7 @@ def _find_peaks(ott):
 
 
 def _compute_peak_features(group, peak):
-    res = group[["ott", "ball_carrier_distance_to_endzone"]].iloc[peak]
+    res = group[["frameId", "ott", "ball_carrier_distance_to_endzone"]].iloc[peak]
     res["mean_distance_to_ball_carrier_from_peak"] = group.iloc[peak:]["distance_to_ball_carrier"].mean()
     res["ball_carrier_distance_won_to_last_frame"] = max(
         res["ball_carrier_distance_to_endzone"] - group.iloc[-1]["ball_carrier_distance_to_endzone"], 0
@@ -25,6 +25,7 @@ def _compute_group_features(group):
     res = pd.concat([_compute_peak_features(group, peak) for peak in peaks], axis=1)
     res = res.T.reset_index(drop=True)
     res.index.name = "opportunityId"
+    res = res.set_index("frameId", append=True)
     return res
 
 

@@ -1,6 +1,7 @@
 import copy
 from pathlib import Path
 import numpy as np
+import pandas as pd
 import plotly.graph_objects as go
 from matplotlib.cm import Reds
 from matplotlib.colors import to_hex
@@ -246,9 +247,10 @@ class Field:
     def _get_color(self, value):
         return to_hex(Reds(value))
 
-    def create_tackling_probability_animation(self, play_tracking):
+    def create_tackling_probability_animation(self, play_tracking, plot_mott=False):
         frames = []
         steps = []
+        mott_predictions = pd.DataFrame()
         for frame_id in play_tracking["frameId"].unique():
             frame_tracking = play_tracking[play_tracking["frameId"] == frame_id]
             players_tracking = frame_tracking[~frame_tracking["nflId"].isna()]
@@ -262,6 +264,46 @@ class Field:
             ]
 
             data = []
+
+            if plot_mott:
+                assert "mott" in play_tracking.columns
+                mott_predictions = pd.concat([mott_predictions, frame_tracking[frame_tracking["mott"] == 1]])
+                if len(mott_predictions) != 0:
+                    data.append(
+                        go.Scatter(
+                            x=mott_predictions["x"],
+                            y=mott_predictions["y"],
+                            mode="markers",
+                            marker={"size": 12, "color": "#FE962F", "opacity": 1, "symbol": "x", "line_width": 1},
+                            customdata=np.stack(
+                                (
+                                    mott_predictions["nflId"].astype(int),
+                                    mott_predictions["displayName"],
+                                    mott_predictions["position"],
+                                    mott_predictions["club"],
+                                    mott_predictions["tackling_probability"].round(2),
+                                ),
+                                axis=-1,
+                            ),
+                            hovertemplate="<b>nflId:</b> %{customdata[0]}<br>"
+                            "<b>Player:</b> %{customdata[1]} %{customdata[2]}<br>"
+                            "<b>Team:</b> %{customdata[3]}<br>"
+                            "<br>"
+                            "<b>Tackling Probability:</b> %{customdata[4]}",
+                            name="MOTT",
+                        ),
+                    )
+                else:
+                    data.append(
+                        go.Scatter(
+                            x=[0],
+                            y=[0],
+                            mode="markers",
+                            marker={"size": 12, "color": "#FE962F", "opacity": 0, "symbol": "x", "line_width": 1},
+                            name="MOTT",
+                            hoverinfo="none",
+                        ),
+                    )
 
             data.append(
                 go.Scatter(
@@ -342,7 +384,7 @@ class Field:
         self.fig.frames = frames
         self.fig.layout.sliders[0]["steps"] = steps
 
-    def add_mott_predictions(self, mott_predictions):
+    def create_mott_predictions_animation(self, play_tracking, mott_predictions):
         mott_predictions = mott_predictions[mott_predictions["mott"] == 1].sort_values("frameId")
         motts = [
             f"{record['position']} {record['displayName']} ({int(record['nflId'])}) on frame {int(record['frameId'])}"
@@ -353,6 +395,14 @@ class Field:
             for i in range(int(np.ceil(len(motts) / 3))):
                 text += ", ".join(motts[3 * i : 3 * (i + 1)]) + "<br>"
             self.fig.layout.title = text
+
+        play_tracking = play_tracking.merge(
+            mott_predictions[["gameId", "playId", "nflId", "frameId", "mott"]],
+            how="left",
+            on=["gameId", "playId", "nflId", "frameId"],
+        )
+
+        self.create_tackling_probability_animation(play_tracking, plot_mott=True)
 
     def save_as_gif(self, name="animated_play"):
         layout = copy.deepcopy(self.fig.layout)

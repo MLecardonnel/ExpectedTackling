@@ -9,4 +9,5 @@ To pinpoint instances of missed opportunities to tackle, the initial step involv
 - For the defensive player: tracking data (s, a, dis, o, dir), distances and directions to the ball carrier and the three nearest blockers
 - For the ball carrier: tracking data (s, a, dis, o, dir), distances to nearest sideline and to the endzone
 - For the three nearest blockers: tracking data (s, a, dis, o, dir)
+
 Orientation and direction features, initially correlated with the play's direction, undergo adjustments to ensure independence from it.

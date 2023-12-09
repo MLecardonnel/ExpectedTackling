@@ -7,7 +7,7 @@ The ability to detect missed opportunities in tackling the ball carrier emerges 
 ### A Frame-by-Frame Tackling Probability to Detect the Opportunities
 To pinpoint instances of missed opportunities to tackle, the initial step involves detecting the tackling opportunities. This identification is achieved through the meticulous creation of a frame-by-frame probability of tackling for each defensive player. The foundation of this probability model is solely based on the positioning and movements of the defensive player, the ball carrier and the blockers. Thus the frame-by-frame features computed for the model are:
 - For the defensive player: tracking data (s, a, dis, o, dir), distances and directions to the ball carrier and the three nearest blockers
-- For the ball carrier: tracking data (s, a, dis, o, dir), distances to nearest sideline and to the endzone
+- For the ball carrier: tracking data (s, a, dis, o, dir), distances to the nearest sideline and to the endzone
 - For the three nearest blockers: tracking data (s, a, dis, o, dir)
 
 Orientation and direction features, initially correlated with the play's direction, undergo adjustments to ensure independence from it.

@@ -1,5 +1,6 @@
 from scipy.signal import find_peaks
 import pandas as pd
+import numpy as np
 
 
 def _find_peaks(ott):
@@ -69,6 +70,7 @@ def sample_training_data(mott_features_data, negatives_multplier=10):
     mott_features_data_for_sampling = mott_features_data[
         ~mott_features_data.index.droplevel([3, 4]).duplicated(keep=False)
     ].copy()
+    mott_features_data_for_sampling = mott_features_data_for_sampling[mott_features_data_for_sampling['ott']!=np.inf]
 
     sample_mott_features_data = pd.concat(
         [
@@ -78,7 +80,8 @@ def sample_training_data(mott_features_data, negatives_multplier=10):
             ],
             mott_features_data_for_sampling[mott_features_data_for_sampling["pff_missedTackle"] == 0].sample(
                 len(mott_features_data_for_sampling[mott_features_data_for_sampling["pff_missedTackle"] == 1])
-                * negatives_multplier
+                * negatives_multplier,
+                random_state = 42
             ),
         ]
     )

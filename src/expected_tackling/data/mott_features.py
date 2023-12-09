@@ -46,7 +46,7 @@ def compute_mott_features_data(features_data, tackling_probability, tackles):
         right_index=True,
     )
     mott_features_data["tackle_or_assist"] = mott_features_data["tackle_or_assist"].fillna(0)
-    mott_features_data.loc[mott_features_data.index.droplevel(3).duplicated(keep="last"), "tackle_or_assist"] = 0
+    mott_features_data.loc[mott_features_data.index.droplevel([3, 4]).duplicated(keep="last"), "tackle_or_assist"] = 0
 
     mott_features_data = mott_features_data.merge(
         tackles[tackles["pff_missedTackle"] == 1].set_index(["gameId", "playId", "nflId"])[["pff_missedTackle"]],
@@ -56,8 +56,8 @@ def compute_mott_features_data(features_data, tackling_probability, tackles):
     )
     mott_features_data["pff_missedTackle"] = mott_features_data["pff_missedTackle"].fillna(0)
     mott_features_data.loc[
-        (mott_features_data.index.droplevel(3).duplicated(keep=False))
-        & (~mott_features_data.index.droplevel(3).duplicated(keep="last"))
+        (mott_features_data.index.droplevel([3, 4]).duplicated(keep=False))
+        & (~mott_features_data.index.droplevel([3, 4]).duplicated(keep="last"))
         & (mott_features_data["tackle_or_assist"] == 1),
         "pff_missedTackle",
     ] = 0
@@ -67,7 +67,7 @@ def compute_mott_features_data(features_data, tackling_probability, tackles):
 
 def sample_training_data(mott_features_data, negatives_multplier=10):
     mott_features_data_for_sampling = mott_features_data[
-        ~mott_features_data.index.droplevel(3).duplicated(keep=False)
+        ~mott_features_data.index.droplevel([3, 4]).duplicated(keep=False)
     ].copy()
 
     sample_mott_features_data = pd.concat(

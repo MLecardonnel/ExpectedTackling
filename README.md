@@ -37,3 +37,5 @@ For each play and defensive player, the OTT metric throughout the frames operate
 
 Optimizing the detection of peaks involves conducting a grid search across multiple hyperparameter configurations to pinpoint genuine tackling opportunities. The resulting optimized peak detection yields the following outcomes in this example case of a player having multiple opportunities to tackle within the same play:
 <img src="reports/figures/peak_detection.png">
+
+Should no tackling opportunities be identified through this peak detection, the argmax of the OTT marks the frame of the play as the optimal opportunity for the defensive player. This enables the retrieval of smaller yet still significant tackling opportunities to study. Furthermore, it becomes possible to predict the outcome of the best opportunity or opportunities for every defensive player in each play.

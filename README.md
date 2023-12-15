@@ -38,4 +38,11 @@ For each play and defensive player, the OTT metric throughout the frames operate
 Optimizing the detection of peaks involves conducting a grid search across multiple hyperparameter configurations to pinpoint genuine tackling opportunities. The resulting optimized peak detection yields the following outcomes in this example case of a player having multiple opportunities to tackle within the same play:
 <img src="reports/figures/peak_detection.png">
 
-Should no tackling opportunities be identified through this peak detection, the argmax of the OTT marks the frame of the play as the optimal opportunity for the defensive player. This enables the retrieval of smaller yet still significant tackling opportunities to study. Furthermore, it becomes possible to predict the outcome of the best opportunity or opportunities for every defensive player in each play.
+Should no tackling opportunities be identified through this peak detection, the argmax of the OTT marks the frame of the play as the optimal opportunity for the defensive player. This enables the retrieval of smaller yet still significant tackling opportunities to study. Furthermore, it becomes possible to predict the outcome of the best opportunity or opportunities for every defensive player on each play.
+
+### Introducing a New Metric for Missed Opportunities To Tackle
+With the optimal tackling opportunities identified for every defensive player on each play, the innovative **MOTT** metric aims to reveal the ones that are not only missed tackles but, to a larger extent, missed opportunities to tackle. The creation of MOTT relies solely on four features for every opportunity:
+- The OTT value at the frame of the opportunity
+- The average distance between the defensive player and the ball carrier, calculated from the frame of the opportunity to the conclusion of the play
+- The distance won by the ball carrier from the frame of the opportunity to the end of the play
+- Whether or not the defensive player executes a tackle or provides assistance during the play

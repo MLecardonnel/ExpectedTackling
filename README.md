@@ -45,4 +45,4 @@ With the optimal tackling opportunities identified for every defensive player on
 - The OTT value at the frame of the opportunity
 - The average distance between the defensive player and the ball carrier, calculated from the frame of the opportunity to the conclusion of the play
 - The distance won by the ball carrier from the frame of the opportunity to the end of the play
-- Whether or not the defensive player executes a tackle or provides assistance during the play
+- Whether or not the defensive player executes a tackle or provides assistance from the opportunity

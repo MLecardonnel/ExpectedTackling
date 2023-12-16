@@ -46,3 +46,8 @@ With the optimal tackling opportunities identified for every defensive player on
 - The average distance between the defensive player and the ball carrier, calculated from the frame of the opportunity to the conclusion of the play
 - The distance won by the ball carrier from the frame of the opportunity to the end of the play
 - Whether or not the defensive player executes a tackle or provides assistance from the opportunity
+
+The target of the model uses the PFF (Pro Football Focus) scouted and provided metric "pff_missedTackle". It indicates whether or not the defensive player missed a tackle on the play. The target is then a transformation of the PFF metric that denotes whether or not the defensive player missed a tackle for every opportunity. The appropriate model is thus a binary classification model. The objective is to minimize false negatives as much as possible. However, given the broader focus on missed tackling opportunities, false positives are also minimized although it is anticipated and intended that some may still be present. They correspond to the missed opportunities that are not missed tackles. Because the chosen feature engineering involves that there is at least one opportunity for every defensive player in each play, the data exhibits a significant imbalance. Thus the model is trained on a sample that reduces the imbalance:
+<img src="reports/figures/mott_confusion_matrix.png">
+
+The model achieves great performances. By predicting on the entire dataset, the volume of false positives is higher and corresponds to the missed opportunities that are not missed tackles. The true positives are the well predicted missed tackles.

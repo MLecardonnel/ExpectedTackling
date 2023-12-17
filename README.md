@@ -88,6 +88,6 @@ However, the model generated three predictions for MOTT on the play:
 
 - The missed tackle by Antonio Hamilton is accurately predicted by the model.
 - Despite Byron Murphy being labeled as a tackler in the tracking data, the model predicts his opportunity as a MOTT. Indeed, running back DeVonta Smith gains an additional five yards and secures the first down after Byron Murphy's attempt at tackling him. It would have been more realistic to consider it as a missed tackle in the provided data.
-- Isaiah Simmons (Number 9) has his tackling opportunity predicted as a MOTT. In fact, it is a missed tackling opportunity that is not a missed tackle as he does not make contact with DeVonta Smith. With a more effective closing route to the Eagles running back, Isaiah Simmons could have potentially prevented him from securing the first down.
+- Isaiah Simmons (Number 9) has his tackling opportunity predicted as a MOTT. In fact, it is a missed tackling opportunity that is not a missed tackle as he does not make contact with DeVonta Smith. With a more effective closing route to the Eagles running back or a dive for the legs, Isaiah Simmons could have potentially prevented him from securing the first down.
 
 The model exceeds expectations in its predictions, which diverge from the provided data but appear to align more closely with reality.

@@ -68,7 +68,7 @@ The feature contributions instill greater confidence in the model, thanks to the
 </p>
 
 - The greater the OTT value, the increased likelihood of a MOTT from the defensive player. Conversely, a lower OTT value decreases the probability
-- When the distance from the defensive player to the ball carrier remains consistently close from the identified opportunity to the conclusion of the play, the likelihood of a MOTT is very low. This translates to an average distance that remains very small between the ball carrier and the defensive player
+- When the distance from the defensive player to the ball carrier remains consistently close from the identified opportunity to the conclusion of the play, the likelihood of a MOTT is very low
 - A low distance gained by the ball carrier from the tackling oppotunity diminishes the probability of a MOTT for the defensive player
 - The likelihood of a MOTT is reduced if the defensive player executes a tackle or provides assistance
 
@@ -107,3 +107,6 @@ Rayshawn Jenkins and Andre Cisco both accumulate a similar number of tackles and
 The MOTT metric draws a different conclusion about their tackling performances through its more comprehensive and general approach on tackling opportunities. In the end, Rayshawn Jenkins performs as well as the average safety with a total of 18 MOTT, which is 2 more than his number of missed tackles. Andre Cisco also reaches a total of 18 MOTT, triple the number of his missed tackles. This indicates that Rayshawn Jenkins and Andre Cisco have similar tackling performances in relation to the opportunities they encounter. 
 
 Due to the minimal difference between his number of missed tackles and MOTT, it can be inferred that Rayshawn Jenkins has an aggressive profile. He attempts to tackle in every opportunity he gets, even in challenging situations that ultimately result in missed tackles. He, therefore, strives to do everything possible to stop the ball carrier. This could be misinterpreted without the new MOTT metric and because of its high number of missed tackles.
+
+### Conclusion
+The MOTT metric introduces an innovative and nuanced approach to evaluating the tackling performances of defensive players in the NFL. The frame-by-frame tackling probability and the introduction of the OTT metric contribute to the accurate identification of genuine tackling opportunities. The final model proves its effectiveness in predicting missed opportunities to tackle, providing insights that closely align with on-field realities compared to conventional data. When combined with other metrics, the MOTT metric provides a more comprehensive evaluation and a deeper understanding of defensive players' performances. Further analysis like reviewing the positioning techniques, field coverage, and tackling methods in instances where players miss opportunities to tackle is instrumental in refining and optimizing their abilities to stop the ball carrier. Moreover, PFF could leverage this metric to pre-select plays featuring potential missed tackles within the missed opportunities, streamlining their analytical processes.

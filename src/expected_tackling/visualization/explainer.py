@@ -49,5 +49,5 @@ class Explainer:
             axes[x, y].imshow(np.array(image))
             axes[x, y].set_axis_off()
 
-        plt.subplots_adjust(wspace=0)
+        plt.subplots_adjust(wspace=0, hspace=0)
         plt.savefig(figures_path + f"/{name}.png", bbox_inches="tight")

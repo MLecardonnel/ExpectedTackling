@@ -21,7 +21,7 @@ The model is configured to predict an equivalent proportion of false negatives a
     <img src="reports/figures/confusion_matrix.png">
 </p>
 
-The analysis of Shapley values, aiming to assess the contributions of each variable, reveals that the model identifies consistent contributions exhibiting clear trends based on the variable modalities. Here are a few examples of features contributions:
+The analysis of Shapley values reveals that the model identifies consistent contributions exhibiting clear trends based on the variable modalities. Here are a few examples of features contributions:
 <p align="center">
     <img src="reports/figures/contributions_examples.png">
 </p>
@@ -69,7 +69,7 @@ The feature contributions instill greater confidence in the model, thanks to the
 
 - The greater the OTT value, the increased likelihood of a MOTT from the defensive player. Conversely, a lower OTT value decreases the probability
 - When the distance from the defensive player to the ball carrier remains consistently close from the identified opportunity to the conclusion of the play, the likelihood of a MOTT is very low
-- A low distance gained by the ball carrier from the tackling oppotunity diminishes the probability of a MOTT for the defensive player
+- A low distance gained by the ball carrier from the tackling opportunity diminishes the probability of a MOTT for the defensive player
 - The likelihood of a MOTT is reduced if the defensive player executes a tackle or provides assistance
 
 The play between the Philadelphia Eagles and the Arizona Cardinals in week five, where DeVonta Smith (Number 6) gained six yards and secured the first down in the third quarter, is selected to showcase **the impressive performance of the MOTT metric on multiple levels**.

@@ -1,3 +1,5 @@
+from typing import Optional
+
 import pandas as pd
 
 
@@ -6,7 +8,7 @@ RUN_EVENT = ["handoff", "run"]
 BALL_SNAP_EVENT = ["ball_snap", "snap_direct", "autoevent_ballsnap"]
 
 
-def get_valid_plays_from_events(tracking):
+def get_valid_plays_from_events(tracking: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
     plays_frames = tracking.drop_duplicates(["gameId", "playId", "frameId"])[["gameId", "playId", "frameId", "event"]]
     plays_events = plays_frames.dropna(subset=["event"]).groupby(["gameId", "playId"])["event"].unique()
 
@@ -26,7 +28,7 @@ def get_valid_plays_from_events(tracking):
     return plays_frames_valid, plays_events
 
 
-def _get_ball_carrier_from_event(group, plays_events):
+def _get_ball_carrier_from_event(group: pd.DataFrame, plays_events: pd.Series) -> pd.DataFrame:
     events = plays_events.loc[(group["gameId"].iloc[0], group["playId"].iloc[0])]
     if any(element in events for element in RUN_EVENT):
         is_RUN_EVENT = group["event"].isin(RUN_EVENT)
@@ -66,7 +68,7 @@ def _get_ball_carrier_from_event(group, plays_events):
     return group
 
 
-def _get_ball_carrier_id(x):
+def _get_ball_carrier_id(x: pd.Series) -> Optional[float]:
     if x["ball_carrier"] == "qb":
         res = x["qbId"]
     elif x["ball_carrier"] == "ball_carrier":
@@ -76,7 +78,13 @@ def _get_ball_carrier_id(x):
     return res
 
 
-def compute_visualization_data(plays_frames_valid, plays_events, plays, players, tracking):
+def compute_visualization_data(
+    plays_frames_valid: pd.DataFrame,
+    plays_events: pd.Series,
+    plays: pd.DataFrame,
+    players: pd.DataFrame,
+    tracking: pd.DataFrame,
+) -> pd.DataFrame:
     visualization_data = plays_frames_valid.reset_index()
     visualization_data["ball_carrier"] = None
 

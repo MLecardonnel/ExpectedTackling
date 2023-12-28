@@ -11,7 +11,7 @@ animations_path = str(Path(__file__).parents[3] / "reports/animations")
 
 
 class Field:
-    def __init__(self, field_width=53.3, field_length=120, step_duration=50):
+    def __init__(self, field_width: float = 53.3, field_length: float = 120.0, step_duration: int = 50):
         self.field_width = field_width
         self.field_length = field_length
         self.field_subdivision = field_length / 12
@@ -108,7 +108,7 @@ class Field:
 
         self.fig = fig
 
-    def _draw_numbers_on_field(self, fig, y):
+    def _draw_numbers_on_field(self, fig: go.Figure, y: float) -> go.Figure:
         numbers_on_field = ["10", "20", "30", "40", "50", "40", "30", "20", "10"]
 
         for i in range(len(numbers_on_field)):
@@ -125,11 +125,13 @@ class Field:
 
         return fig
 
-    def _draw_rectangle_on_field(self, fig, x0, y0, x1, y1, color):
+    def _draw_rectangle_on_field(
+        self, fig: go.Figure, x0: float, y0: float, x1: float, y1: float, color: str
+    ) -> go.Figure:
         fig.add_shape(type="rect", x0=x0, y0=y0, x1=x1, y1=y1, line_width=0, layer="below", fillcolor=color)
         return fig
 
-    def _draw_line_on_field(self, fig, x, color, width):
+    def _draw_line_on_field(self, fig: go.Figure, x: float, color: str, width: int) -> go.Figure:
         fig.add_shape(
             type="line",
             x0=x,
@@ -144,7 +146,7 @@ class Field:
         )
         return fig
 
-    def _create_step(self, frame_id):
+    def _create_step(self, frame_id: int) -> dict:
         step = {
             "args": [
                 [frame_id],
@@ -159,7 +161,7 @@ class Field:
         }
         return step
 
-    def draw_scrimmage_and_first_down(self, absoluteYardlineNumber, yardsToGo, playDirection):
+    def draw_scrimmage_and_first_down(self, absoluteYardlineNumber: int, yardsToGo: int, playDirection: str) -> None:
         if playDirection == "right":
             yard_line_first_down = absoluteYardlineNumber + yardsToGo
         elif playDirection == "left":
@@ -170,7 +172,7 @@ class Field:
         self.fig = self._draw_line_on_field(self.fig, absoluteYardlineNumber, "#0070C0", 2)
         self.fig = self._draw_line_on_field(self.fig, yard_line_first_down, "#E9D11F", 2)
 
-    def create_animation(self, play_tracking):
+    def create_animation(self, play_tracking: pd.DataFrame) -> None:
         frames = []
         steps = []
         for frame_id in play_tracking["frameId"].unique():
@@ -244,10 +246,10 @@ class Field:
         self.fig.frames = frames
         self.fig.layout.sliders[0]["steps"] = steps
 
-    def _get_color(self, value):
+    def _get_color(self, value: float) -> str:
         return to_hex(Reds(value))
 
-    def create_tackling_probability_animation(self, play_tracking, plot_mott=False):
+    def create_tackling_probability_animation(self, play_tracking: pd.DataFrame, plot_mott: bool = False) -> None:
         frames = []
         steps = []
         mott_predictions = pd.DataFrame()
@@ -384,7 +386,7 @@ class Field:
         self.fig.frames = frames
         self.fig.layout.sliders[0]["steps"] = steps
 
-    def create_mott_predictions_animation(self, play_tracking, mott_predictions):
+    def create_mott_predictions_animation(self, play_tracking: pd.DataFrame, mott_predictions: pd.DataFrame) -> None:
         mott_predictions = mott_predictions[mott_predictions["mott"] == 1].sort_values("frameId")
         motts = [
             f"{record['position']} {record['displayName']} ({int(record['nflId'])}) on frame {int(record['frameId'])}"
@@ -404,7 +406,7 @@ class Field:
 
         self.create_tackling_probability_animation(play_tracking, plot_mott=True)
 
-    def save_as_gif(self, name="animated_play"):
+    def save_as_gif(self, name: str = "animated_play") -> None:
         layout = copy.deepcopy(self.fig.layout)
         with imageio.get_writer(animations_path + f"/{name}.gif", mode="I", loop=0) as writer:
             for i, frame in enumerate(self.fig.frames):

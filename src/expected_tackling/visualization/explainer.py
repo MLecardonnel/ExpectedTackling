@@ -1,15 +1,18 @@
+from typing import Any
 import io
 from pathlib import Path
 from PIL import Image
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from shapash import SmartExplainer
+from shapash.utils.threading import CustomThread
 
 figures_path = str(Path(__file__).parents[3] / "reports/figures")
 
 
 class Explainer:
-    def __init__(self, X, y, model, sample_size=100000):
+    def __init__(self, X: pd.DataFrame, y: pd.Series, model: Any, sample_size: int = 100000) -> None:
         if X.shape[0] > sample_size:
             X = X.sample(sample_size)
 
@@ -24,19 +27,19 @@ class Explainer:
 
         self.xpl = xpl
 
-    def run_app(self, port=8050):
+    def run_app(self, port: int = 8050) -> CustomThread:
         return self.xpl.run_app(port=port)
 
     def plot_contributions_examples(
         self,
-        features_columns=[
+        features_columns: list = [
             "distance_to_ball_carrier",
             "direction_to_ball_carrier",
             "s",
             "ball_carrier_distance_to_endzone",
         ],
-        name="contributions_examples",
-    ):
+        name: str = "contributions_examples",
+    ) -> None:
         nb_features = len(features_columns)
         nrows = nb_features // 2 + nb_features % 2
         fig, axes = plt.subplots(nrows=nrows, ncols=2, figsize=(12, 4 * nrows))

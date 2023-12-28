@@ -9,7 +9,9 @@ from plotly.figure_factory import create_table
 figures_path = str(Path(__file__).parents[3] / "reports/figures")
 
 
-def plot_confusion_matrix(train_confusion_matrix, test_confusion_matrix, name="confusion_matrix"):
+def plot_confusion_matrix(
+    train_confusion_matrix: np.ndarray, test_confusion_matrix: np.ndarray, name: str = "confusion_matrix"
+) -> None:
     train_table = create_table(
         pd.DataFrame(
             train_confusion_matrix,

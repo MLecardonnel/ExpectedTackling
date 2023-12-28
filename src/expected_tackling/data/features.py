@@ -1,10 +1,11 @@
 import numpy as np
 import pandas as pd
 from multiprocessing import Manager
+from multiprocessing.managers import ListProxy
 import concurrent.futures
 
 
-def create_target(visualization_tracking_data, tackles):
+def create_target(visualization_tracking_data: pd.DataFrame, tackles: pd.DataFrame) -> pd.DataFrame:
     tackles = tackles.copy()
     tackles["tackle_or_assist"] = tackles[["tackle", "assist"]].max(axis=1)
     tackles = tackles[(tackles["tackle_or_assist"] == 1)][["gameId", "playId", "nflId", "tackle_or_assist"]]
@@ -19,20 +20,20 @@ def create_target(visualization_tracking_data, tackles):
     return targeted_data
 
 
-def _compute_distance_between_players(x1, y1, x2, y2):
+def _compute_distance_between_players(x1: float, y1: float, x2: float, y2: float) -> float:
     return np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
 
-def _compute_angle_between_players(x1, y1, x2, y2):
+def _compute_angle_between_players(x1: float, y1: float, x2: float, y2: float) -> float:
     angle = np.arctan2(x2 - x1, y2 - y1)
     return (np.degrees(angle) + 360) % 360
 
 
-def _compute_distance_to_nearest_sideline(y, field_width=53.3):
+def _compute_distance_to_nearest_sideline(y: float, field_width: float = 53.3) -> float:
     return min(y - 0, field_width - y)
 
 
-def _compute_distance_to_endzone(x, playDirection, field_length=120):
+def _compute_distance_to_endzone(x: float, playDirection: str, field_length: float = 120.0) -> float:
     field_subdivision = field_length / 12
     if playDirection == "right":
         distance = field_length - field_subdivision - x
@@ -43,7 +44,7 @@ def _compute_distance_to_endzone(x, playDirection, field_length=120):
     return distance
 
 
-def _compute_blockers_features(sample, frame_blockers, nb_blockers=3):
+def _compute_blockers_features(sample: pd.Series, frame_blockers: pd.DataFrame, nb_blockers: int = 3) -> pd.Series:
     frame_blockers = frame_blockers.copy()
     columns_to_suffix = ["s", "a", "dis", "o", "dir"]
     columns_suffix_dict = {col: col + "_blocker" for col in columns_to_suffix}
@@ -66,7 +67,9 @@ def _compute_blockers_features(sample, frame_blockers, nb_blockers=3):
     return blockers_features
 
 
-def _compute_sample_features(sample, frame_ball_carrier, frame_blockers):
+def _compute_sample_features(
+    sample: pd.Series, frame_ball_carrier: pd.Series, frame_blockers: pd.DataFrame
+) -> pd.Series:
     sample = sample.copy()
     sample["distance_to_ball_carrier"] = _compute_distance_between_players(
         sample["x"], sample["y"], frame_ball_carrier["x"], frame_ball_carrier["y"]
@@ -82,7 +85,9 @@ def _compute_sample_features(sample, frame_ball_carrier, frame_blockers):
     return sample_features
 
 
-def _compute_group_features(group, frame_ball_carrier, frame_blockers):
+def _compute_group_features(
+    group: pd.DataFrame, frame_ball_carrier: pd.Series, frame_blockers: pd.DataFrame
+) -> pd.DataFrame:
     return group.apply(
         lambda x: _compute_sample_features(
             x,
@@ -93,7 +98,7 @@ def _compute_group_features(group, frame_ball_carrier, frame_blockers):
     )
 
 
-def _inverse_left_directed_plays(features_data):
+def _inverse_left_directed_plays(features_data: pd.DataFrame) -> pd.DataFrame:
     left_playDirection = features_data["playDirection"] == "left"
     blockers_columns = [
         col
@@ -106,7 +111,7 @@ def _inverse_left_directed_plays(features_data):
     return features_data
 
 
-def compute_features_data(targeted_data, tracking):
+def compute_features_data(targeted_data: pd.DataFrame, tracking: pd.DataFrame) -> pd.DataFrame:
     merged_data = targeted_data.merge(
         tracking[["gameId", "playId", "nflId", "frameId"] + [col for col in tracking if col not in targeted_data]],
         on=["gameId", "playId", "nflId", "frameId"],
@@ -162,13 +167,22 @@ def compute_features_data(targeted_data, tracking):
     return features_data
 
 
-def process_function(shared_dataframe_list, start, end, targeted_data, tracking, tracking_games):
+def process_function(
+    shared_dataframe_list: ListProxy,
+    start: int,
+    end: int,
+    targeted_data: pd.DataFrame,
+    tracking: pd.DataFrame,
+    tracking_games: list,
+) -> None:
     features_data = compute_features_data(targeted_data, tracking[tracking["gameId"].isin(tracking_games[start:end])])
 
     shared_dataframe_list.append(features_data)
 
 
-def compute_features_data_with_multiprocessing(targeted_data, tracking, nb_process=10):
+def compute_features_data_with_multiprocessing(
+    targeted_data: pd.DataFrame, tracking: pd.DataFrame, nb_process: int = 10
+) -> pd.DataFrame:
     tracking_games = tracking["gameId"].unique()
     total_items = len(tracking_games)
     chunk_size = total_items // nb_process

@@ -1,11 +1,26 @@
+import concurrent.futures
+from multiprocessing import Manager
+from multiprocessing.managers import ListProxy  # type: ignore
+
 import numpy as np
 import pandas as pd
-from multiprocessing import Manager
-from multiprocessing.managers import ListProxy
-import concurrent.futures
 
 
 def create_target(visualization_tracking_data: pd.DataFrame, tackles: pd.DataFrame) -> pd.DataFrame:
+    """Create a target variable indicating whether a player will tackle or assist in a given play.
+
+    Parameters
+    ----------
+    visualization_tracking_data : pd.DataFrame
+        DataFrame containing visualization tracking data and ball carrier information.
+    tackles : pd.DataFrame
+        DataFrame containing information about tackles and assists.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with an added column 'will_tackle' indicating whether a player will tackle or assist.
+    """
     tackles = tackles.copy()
     tackles["tackle_or_assist"] = tackles[["tackle", "assist"]].max(axis=1)
     tackles = tackles[(tackles["tackle_or_assist"] == 1)][["gameId", "playId", "nflId", "tackle_or_assist"]]
@@ -112,6 +127,20 @@ def _inverse_left_directed_plays(features_data: pd.DataFrame) -> pd.DataFrame:
 
 
 def compute_features_data(targeted_data: pd.DataFrame, tracking: pd.DataFrame) -> pd.DataFrame:
+    """Compute features for player movements and distances.
+
+    Parameters
+    ----------
+    targeted_data : pd.DataFrame
+        DataFrame containing visualization tracking data and ball carrier information.
+    tracking : pd.DataFrame
+        DataFrame containing complete tracking data.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with computed features for defensive players.
+    """
     merged_data = targeted_data.merge(
         tracking[["gameId", "playId", "nflId", "frameId"] + [col for col in tracking if col not in targeted_data]],
         on=["gameId", "playId", "nflId", "frameId"],
@@ -175,6 +204,23 @@ def process_function(
     tracking: pd.DataFrame,
     tracking_games: list,
 ) -> None:
+    """Process a subset of tracking data and append computed features to a shared list.
+
+    Parameters
+    ----------
+    shared_dataframe_list : ListProxy
+        A shared list to which computed features data will be appended.
+    start : int
+        The starting index of the subset of tracking games to process.
+    end : int
+        The ending index (exclusive) of the subset of tracking games to process.
+    targeted_data : pd.DataFrame
+        DataFrame containing visualization tracking data and ball carrier information.
+    tracking : pd.DataFrame
+        DataFrame containing complete tracking data.
+    tracking_games : list
+        List of game identifiers to consider for processing.
+    """
     features_data = compute_features_data(targeted_data, tracking[tracking["gameId"].isin(tracking_games[start:end])])
 
     shared_dataframe_list.append(features_data)
@@ -183,6 +229,22 @@ def process_function(
 def compute_features_data_with_multiprocessing(
     targeted_data: pd.DataFrame, tracking: pd.DataFrame, nb_process: int = 10
 ) -> pd.DataFrame:
+    """Compute features for player movements and distances using multiprocessing.
+
+    Parameters
+    ----------
+    targeted_data : pd.DataFrame
+        DataFrame containing visualization tracking data and ball carrier information.
+    tracking : pd.DataFrame
+        DataFrame containing complete tracking data.
+    nb_process : int, optional
+        Number of processes to use for parallel computation, by default 10.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with computed features for defensive players.
+    """
     tracking_games = tracking["gameId"].unique()
     total_items = len(tracking_games)
     chunk_size = total_items // nb_process
@@ -191,7 +253,7 @@ def compute_features_data_with_multiprocessing(
         chunk_size = total_items // nb_process
 
     manager = Manager()
-    shared_dataframe_list = manager.list()
+    shared_dataframe_list: ListProxy = manager.list()
 
     with concurrent.futures.ProcessPoolExecutor() as executor:
         futures = [

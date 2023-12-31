@@ -2,13 +2,24 @@ from typing import Optional
 
 import pandas as pd
 
-
 POSSIBLE_LAST_EVENT = ["tackle", "out_of_bounds", "touchdown", "fumble", "qb_slide", "safety"]
 RUN_EVENT = ["handoff", "run"]
 BALL_SNAP_EVENT = ["ball_snap", "snap_direct", "autoevent_ballsnap"]
 
 
 def get_valid_plays_from_events(tracking: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
+    """Extract valid plays and events sequences from tracking data.
+
+    Parameters
+    ----------
+    tracking : pd.DataFrame
+        DataFrame containing tracking data.
+
+    Returns
+    -------
+    tuple[pd.DataFrame, pd.Series]
+        DataFrame with valid plays frames, Series with events sequences for valid plays.
+    """
     plays_frames = tracking.drop_duplicates(["gameId", "playId", "frameId"])[["gameId", "playId", "frameId", "event"]]
     plays_events = plays_frames.dropna(subset=["event"]).groupby(["gameId", "playId"])["event"].unique()
 
@@ -85,6 +96,26 @@ def compute_visualization_data(
     players: pd.DataFrame,
     tracking: pd.DataFrame,
 ) -> pd.DataFrame:
+    """Compute visualization data during valid plays.
+
+    Parameters
+    ----------
+    plays_frames_valid : pd.DataFrame
+        DataFrame with valid plays frames.
+    plays_events : pd.Series
+        Series with events sequences for valid plays.
+    plays : pd.DataFrame
+        DataFrame containing play information.
+    players : pd.DataFrame
+        DataFrame containing player information.
+    tracking : pd.DataFrame
+        DataFrame containing tracking data.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with visualization data.
+    """
     visualization_data = plays_frames_valid.reset_index()
     visualization_data["ball_carrier"] = None
 

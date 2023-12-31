@@ -1,17 +1,31 @@
 import copy
 from pathlib import Path
+
+import imageio.v2 as imageio
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 from matplotlib.cm import Reds
 from matplotlib.colors import to_hex
-import imageio.v2 as imageio
 
 animations_path = str(Path(__file__).parents[3] / "reports/animations")
 
 
 class Field:
+    """Class for visualizing a football field with tracking data for a play"""
+
     def __init__(self, field_width: float = 53.3, field_length: float = 120.0, step_duration: int = 50):
+        """Initialize the Field object.
+
+        Parameters
+        ----------
+        field_width : float, optional
+            Width of the football field, by default 53.3
+        field_length : float, optional
+            Length of the football field, by default 120.0
+        step_duration : int, optional
+            Duration for animation steps, by default 50
+        """
         self.field_width = field_width
         self.field_length = field_length
         self.field_subdivision = field_length / 12
@@ -146,7 +160,7 @@ class Field:
         )
         return fig
 
-    def _create_step(self, frame_id: int) -> dict:
+    def _create_step(self, frame_id: str) -> dict:
         step = {
             "args": [
                 [frame_id],
@@ -162,6 +176,17 @@ class Field:
         return step
 
     def draw_scrimmage_and_first_down(self, absoluteYardlineNumber: int, yardsToGo: int, playDirection: str) -> None:
+        """Draw scrimmage line and first down marker on the football field.
+
+        Parameters
+        ----------
+        absoluteYardlineNumber : int
+            Absolute yardline number on the football field
+        yardsToGo : int
+            Yards to go for a first down
+        playDirection : str
+            Direction of play
+        """
         if playDirection == "right":
             yard_line_first_down = absoluteYardlineNumber + yardsToGo
         elif playDirection == "left":
@@ -173,6 +198,13 @@ class Field:
         self.fig = self._draw_line_on_field(self.fig, yard_line_first_down, "#E9D11F", 2)
 
     def create_animation(self, play_tracking: pd.DataFrame) -> None:
+        """Create an animation for player movements during a play.
+
+        Parameters
+        ----------
+        play_tracking : pd.DataFrame
+            DataFrame containing tracking data for players during the play.
+        """
         frames = []
         steps = []
         for frame_id in play_tracking["frameId"].unique():
@@ -250,6 +282,15 @@ class Field:
         return to_hex(Reds(value))
 
     def create_tackling_probability_animation(self, play_tracking: pd.DataFrame, plot_mott: bool = False) -> None:
+        """Create an animation for player movements during a play with tackling probability visualization.
+
+        Parameters
+        ----------
+        play_tracking : pd.DataFrame
+            DataFrame containing tracking data for players during the play.
+        plot_mott : bool, optional
+            Flag to plot MOTT (Missed Opportunity to Tackle) predictions, by default False.
+        """
         frames = []
         steps = []
         mott_predictions = pd.DataFrame()
@@ -387,6 +428,15 @@ class Field:
         self.fig.layout.sliders[0]["steps"] = steps
 
     def create_mott_predictions_animation(self, play_tracking: pd.DataFrame, mott_predictions: pd.DataFrame) -> None:
+        """Create an animation for player movements during a football play with highlighted MOTT predictions.
+
+        Parameters
+        ----------
+        play_tracking : pd.DataFrame
+            DataFrame containing tracking data for players during the play.
+        mott_predictions : pd.DataFrame
+            DataFrame containing MOTT predictions for players.
+        """
         mott_predictions = mott_predictions[mott_predictions["mott"] == 1].sort_values("frameId")
         motts = [
             f"{record['position']} {record['displayName']} ({int(record['nflId'])}) on frame {int(record['frameId'])}"
@@ -407,6 +457,13 @@ class Field:
         self.create_tackling_probability_animation(play_tracking, plot_mott=True)
 
     def save_as_gif(self, name: str = "animated_play") -> None:
+        """Save the animated play as a GIF file.
+
+        Parameters
+        ----------
+        name : str, optional
+            Name of the saved GIF file, by default "animated_play"
+        """
         layout = copy.deepcopy(self.fig.layout)
         with imageio.get_writer(animations_path + f"/{name}.gif", mode="I", loop=0) as writer:
             for i, frame in enumerate(self.fig.frames):

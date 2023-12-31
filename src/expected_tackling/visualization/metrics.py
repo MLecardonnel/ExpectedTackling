@@ -1,9 +1,10 @@
 import io
 from pathlib import Path
-from PIL import Image
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from PIL import Image
 from plotly.figure_factory import create_table
 
 figures_path = str(Path(__file__).parents[3] / "reports/figures")
@@ -12,6 +13,17 @@ figures_path = str(Path(__file__).parents[3] / "reports/figures")
 def plot_confusion_matrix(
     train_confusion_matrix: np.ndarray, test_confusion_matrix: np.ndarray, name: str = "confusion_matrix"
 ) -> None:
+    """Plot confusion matrices for training and testing datasets.
+
+    Parameters
+    ----------
+    train_confusion_matrix : np.ndarray
+        Confusion matrix for the training dataset.
+    test_confusion_matrix : np.ndarray
+        Confusion matrix for the testing dataset.
+    name : str, optional
+        Name for the saved plot, by default "confusion_matrix"
+    """
     train_table = create_table(
         pd.DataFrame(
             train_confusion_matrix,

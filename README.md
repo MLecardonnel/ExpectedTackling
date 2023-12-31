@@ -16,7 +16,7 @@ The probability model operates as a binary classification model, where the objec
 
  It is anticipated and intended that the model predicts false positives for players during frames where they are in close proximity to stopping the ball carrier. Likewise, false negatives are expected during the initial frames for players who will make a stop at the conclusion of the play. The data exhibits imbalance, given that in a single play, it is probable that none, or only one or two players among the eleven defensive players aligned, will execute a tackle or provide assistance. This aligns perfectly with the intended model, as the mean predicted probability for such data tends to be relatively low. Moreover, specific features play a crucial role in boosting this probability for tackling opportunities.
 
-The model is configured to predict an equivalent proportion of false negatives and false positives and the results are: 
+The model is configured to predict an equivalent proportion of false negatives and false positives and the results are:
 <p align="center">
     <img src="reports/figures/confusion_matrix.png">
 </p>
@@ -95,16 +95,16 @@ The model exceeds expectations in its predictions, which diverge from the provid
 
 ### Analysis based on the innovative MOTT metric
 
-Tackling performances can be assessed by comparing the count of MOTT to the total number of tackles and assists for each defensive player. To grasp the subtleties introduced by the metric in the comprehensive evaluation of a defensive player's performance, the same analysis is performed with the tally of missed tackles. 
+Tackling performances can be assessed by comparing the count of MOTT to the total number of tackles and assists for each defensive player. To grasp the subtleties introduced by the metric in the comprehensive evaluation of a defensive player's performance, the same analysis is performed with the tally of missed tackles.
 
 In the figure below, attention is directed towards the tackling performances of safeties, with a particular emphasis on the two safeties from the Jacksonville Jaguars, Rayshawn Jenkins and Andre Cisco.
 <p align="center">
     <img src="reports/figures/safeties_tackling_performances.png">
 </p>
 
-Rayshawn Jenkins and Andre Cisco both accumulate a similar number of tackles and assists, with respective totals of 48 and 45. However, one could argue that Andre Cisco's tackling performances are significantly better than those of Rayshawn Jenkins, based on missed tackles. Indeed, Rayshawn Jenkins performs much less effectively than the average safety due to his total of 16 missed tackles. In comparison, Andre Cisco has missed only 6 tackles and falls within the average range. 
+Rayshawn Jenkins and Andre Cisco both accumulate a similar number of tackles and assists, with respective totals of 48 and 45. However, one could argue that Andre Cisco's tackling performances are significantly better than those of Rayshawn Jenkins, based on missed tackles. Indeed, Rayshawn Jenkins performs much less effectively than the average safety due to his total of 16 missed tackles. In comparison, Andre Cisco has missed only 6 tackles and falls within the average range.
 
-The MOTT metric draws a different conclusion about their tackling performances through its more comprehensive and general approach on tackling opportunities. In the end, Rayshawn Jenkins performs as well as the average safety with a total of 18 MOTT, which is 2 more than his number of missed tackles. Andre Cisco also reaches a total of 18 MOTT, triple the number of his missed tackles. This indicates that Rayshawn Jenkins and Andre Cisco have similar tackling performances in relation to the opportunities they encounter. 
+The MOTT metric draws a different conclusion about their tackling performances through its more comprehensive and general approach on tackling opportunities. In the end, Rayshawn Jenkins performs as well as the average safety with a total of 18 MOTT, which is 2 more than his number of missed tackles. Andre Cisco also reaches a total of 18 MOTT, triple the number of his missed tackles. This indicates that Rayshawn Jenkins and Andre Cisco have similar tackling performances in relation to the opportunities they encounter.
 
 Due to the minimal difference between his number of missed tackles and MOTT, it can be inferred that Rayshawn Jenkins has an aggressive profile. He attempts to tackle in every opportunity he gets, even in challenging situations that ultimately result in missed tackles. He, therefore, strives to do everything possible to stop the ball carrier. This could be misinterpreted without the new MOTT metric and because of its high number of missed tackles.
 

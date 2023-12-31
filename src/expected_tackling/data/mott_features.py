@@ -1,6 +1,6 @@
-from scipy.signal import find_peaks
-import pandas as pd
 import numpy as np
+import pandas as pd
+from scipy.signal import find_peaks
 
 
 def _find_peaks(ott: pd.Series) -> list:
@@ -33,6 +33,23 @@ def _compute_group_features(group: pd.DataFrame) -> pd.DataFrame:
 def compute_mott_features_data(
     features_data: pd.DataFrame, tackling_probability: pd.DataFrame, tackles: pd.DataFrame
 ) -> pd.DataFrame:
+    """Compute MOTT (Missed Opportunities To Tackle) features for every identified tackling
+    opportunities for each defensive player.
+
+    Parameters
+    ----------
+    features_data : pd.DataFrame
+        DataFrame with computed movement features for defensive players.
+    tackling_probability : pd.DataFrame
+        DataFrame containing tackling probabilities.
+    tackles : pd.DataFrame
+        DataFrame containing information about tackles and assists.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with MOTT features.
+    """
     features_data = features_data[
         ["gameId", "playId", "nflId", "frameId", "distance_to_ball_carrier", "ball_carrier_distance_to_endzone"]
     ].merge(tackling_probability, on=["gameId", "playId", "nflId", "frameId"])
@@ -69,6 +86,20 @@ def compute_mott_features_data(
 
 
 def sample_training_data(mott_features_data: pd.DataFrame, negatives_multplier: int = 10) -> pd.DataFrame:
+    """Sample training data for MOTT (Missed Opportunities To Tackle) features.
+
+    Parameters
+    ----------
+    mott_features_data : pd.DataFrame
+        DataFrame containing MOTT features.
+    negatives_multplier : int, optional
+        Multiplier for the number of negative samples, by default 10.
+
+    Returns
+    -------
+    pd.DataFrame
+        Sampled DataFrame with training data for MOTT features.
+    """
     mott_features_data_for_sampling = mott_features_data[
         ~mott_features_data.index.droplevel([3, 4]).duplicated(keep=False)
     ].copy()

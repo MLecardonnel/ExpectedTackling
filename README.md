@@ -106,7 +106,7 @@ Rayshawn Jenkins and Andre Cisco both accumulate a similar number of tackles and
 
 The MOTT metric draws a different conclusion about their tackling performances through its more comprehensive and general approach on tackling opportunities. In the end, Rayshawn Jenkins performs as well as the average safety with a total of 18 MOTT, which is 2 more than his number of missed tackles. Andre Cisco also reaches a total of 18 MOTT, triple the number of his missed tackles. This indicates that Rayshawn Jenkins and Andre Cisco have similar tackling performances in relation to the opportunities they encounter.
 
-Due to the minimal difference between his number of missed tackles and MOTT, it can be inferred that Rayshawn Jenkins has an aggressive profile. He attempts to tackle in every opportunity he gets, even in challenging situations that ultimately result in missed tackles. He, therefore, strives to do everything possible to stop the ball carrier. This could be misinterpreted without the new MOTT metric and because of its high number of missed tackles.
+Due to the minimal difference between his number of missed tackles and MOTT, it can be inferred that Rayshawn Jenkins has an aggressive profile. He attempts to tackle in every opportunity he gets, even in challenging situations that ultimately result in missed tackles. He, therefore, strives to do everything possible to stop the ball carrier. This could be misinterpreted without the new MOTT metric and because of his high number of missed tackles.
 
 From an offensive standpoint, the introduction of the MOTT metric enables the analysis of avoided tackles, providing additional insights for a comprehensive evaluation of player elusiveness.
 <p align="center">
